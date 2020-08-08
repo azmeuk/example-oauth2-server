@@ -1,0 +1,3 @@
+[submodule "server-ldap-schemas"]
+	path = server-ldap-schemas
+	url = https://bitbucket.org/connect2id/server-ldap-schemas.git

@@ -1,0 +1,52 @@
+dn: ou=groups,dc=mydomain,dc=tld
+objectclass: organizationalUnit
+ou: groups
+
+dn: cn=managers,ou=groups,dc=mydomain,dc=tld
+cn: managers
+gidnumber: 10000
+memberuid: admin
+objectclass: posixGroup
+objectclass: top
+
+dn: cn=users,ou=groups,dc=mydomain,dc=tld
+cn: testeurs
+gidnumber: 10001
+memberuid: admin
+memberuid: user
+objectclass: posixGroup
+objectclass: top
+
+dn: ou=users,dc=mydomain,dc=tld
+objectclass: organizationalUnit
+ou: users
+
+dn: cn=Jane Doe,ou=users,dc=mydomain,dc=tld
+cn: Jane Doe
+gidnumber: 10000
+givenname: Jane
+homedirectory: /home/users/admin
+loginshell: /bin/bash
+mail: admin@mydomain.tld
+objectclass: inetOrgPerson
+objectclass: posixAccount
+objectclass: top
+sn: Doe
+uid: admin
+uidnumber: 1000
+userpassword: {SSHA}7zQVLckaEc6cJEsS0ylVipvb2PAR/4tS
+
+dn: cn=John Doe,ou=users,dc=mydomain,dc=tld
+cn: John
+gidnumber: 10001
+givenname: John
+homedirectory: /home/users/user
+loginshell: /bin/bash
+mail: user@mydomain.tld
+objectclass: inetOrgPerson
+objectclass: posixAccount
+objectclass: top
+sn: Doe
+uid: user
+uidnumber: 1001
+userpassword: {SSHA}Yr1ZxSljRsKyaTB30suY2iZ1KRTStF1X

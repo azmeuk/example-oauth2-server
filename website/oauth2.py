@@ -2,10 +2,11 @@ from authlib.integrations.flask_oauth2 import (
     AuthorizationServer,
     ResourceProtector,
 )
-from authlib.oauth2.rfc6749 import grants
+from authlib.oauth2.rfc6749 import grants, util
+from authlib.oauth2.rfc6750 import BearerTokenValidator
+from authlib.oauth2.rfc7009 import RevocationEndpoint
 from authlib.oauth2.rfc7636 import CodeChallenge
-from .models import db, User
-from .models import OAuth2Client, OAuth2AuthorizationCode, OAuth2Token
+from .models import User, Client, Authorization, Token
 
 
 class AuthorizationCodeGrant(grants.AuthorizationCodeGrant):
@@ -18,7 +19,7 @@ class AuthorizationCodeGrant(grants.AuthorizationCodeGrant):
     def save_authorization_code(self, code, request):
         code_challenge = request.data.get("code_challenge")
         code_challenge_method = request.data.get("code_challenge_method")
-        auth_code = OAuth2AuthorizationCode(
+        auth_code = Authorization(
             code=code,
             client_id=request.client.client_id,
             redirect_uri=request.redirect_uri,
@@ -27,20 +28,21 @@ class AuthorizationCodeGrant(grants.AuthorizationCodeGrant):
             code_challenge=code_challenge,
             code_challenge_method=code_challenge_method,
         )
-        db.session.add(auth_code)
-        db.session.commit()
+        #db.session.add(auth_code)
+        #db.session.commit()
         return auth_code
 
     def query_authorization_code(self, code, client):
-        auth_code = OAuth2AuthorizationCode.query.filter_by(
+        auth_code = Authorization.query.filter_by(
             code=code, client_id=client.client_id
         ).first()
         if auth_code and not auth_code.is_expired():
             return auth_code
 
     def delete_authorization_code(self, authorization_code):
-        db.session.delete(authorization_code)
-        db.session.commit()
+        pass
+        #db.session.delete(authorization_code)
+        #db.session.commit()
 
     def authenticate_user(self, authorization_code):
         return User.query.get(authorization_code.user_id)
@@ -48,14 +50,14 @@ class AuthorizationCodeGrant(grants.AuthorizationCodeGrant):
 
 class PasswordGrant(grants.ResourceOwnerPasswordCredentialsGrant):
     def authenticate_user(self, username, password):
-        user = User.query.filter_by(username=username).first()
+        user = User.get(username)
         if user is not None and user.check_password(password):
             return user
 
 
 class RefreshTokenGrant(grants.RefreshTokenGrant):
     def authenticate_refresh_token(self, refresh_token):
-        token = OAuth2Token.query.filter_by(refresh_token=refresh_token).first()
+        token = Token.query.filter_by(refresh_token=refresh_token).first()
         if token and token.is_refresh_token_active():
             return token
 
@@ -64,48 +66,46 @@ class RefreshTokenGrant(grants.RefreshTokenGrant):
 
     def revoke_old_credential(self, credential):
         credential.revoked = True
-        db.session.add(credential)
-        db.session.commit()
+        #db.session.add(credential)
+        #db.session.commit()
 
 
-def create_query_client_func(session, client_model):
-    """Create an ``query_client`` function that can be used in authorization
-    server.
-    :param session: SQLAlchemy session
-    :param client_model: Client model class
-    """
-
-    def query_client(client_id):
-        q = session.query(client_model)
-        return q.filter_by(client_id=client_id).first()
-
-    return query_client
+def query_client(client_id):
+    return Client.get(client_id)
 
 
-query_client = create_query_client_func(db.session, OAuth2Client)
+def save_token(token, request):
+    client_id, client_secret = util.extract_basic_authorization(request.headers)
+    t = Token(
+        authzAccessToken=token['access_token'],
+        authzScopeValue=token['scope'],
+        authzSubject=request.user.dn,
+        authzClientID=client_id,
+        authzRefreshTokenSecret=token['refresh_token'],
+        authzAccessTokenLifetime=str(token['expires_in']),
+        # ??? = token['type']
+    )
+    t.save()
+    return t
 
+class RevocationEndpoint(RevocationEndpoint):
+    def query_token(self, token, token_type_hint, client):
+        print("query_token",token, token_type_hint, client)
+        return None
 
-def create_save_token_func(session, token_model):
-    """Create an ``save_token`` function that can be used in authorization
-    server.
-    :param session: SQLAlchemy session
-    :param token_model: Token model class
-    """
+    def revoke_token(self, token):
+        print("revoke_token", token)
 
-    def save_token(token, request):
-        if request.user:
-            user_id = request.user.get_user_id()
-        else:
-            user_id = None
-        client = request.client
-        item = token_model(client_id=client.client_id, user_id=user_id, **token)
-        session.add(item)
-        session.commit()
+class BearerTokenValidator(BearerTokenValidator):
+    def authenticate_token(self, token_string):
+        print("authenticate_token", token_string)
 
-    return save_token
+    def request_invalid(self, request):
+        print("request_invalid", request)
+        return False
 
-
-save_token = create_save_token_func(db.session, OAuth2Token)
+    def token_revoked(self, token):
+        print("token_revoked", token)
 
 authorization = AuthorizationServer(query_client=query_client, save_token=save_token,)
 require_oauth = ResourceProtector()
@@ -121,74 +121,6 @@ def config_oauth(app):
     authorization.register_grant(PasswordGrant)
     authorization.register_grant(RefreshTokenGrant)
 
-    # support revocation
-    def create_revocation_endpoint(session, token_model):
-        """Create a revocation endpoint class with SQLAlchemy session
-        and token model.
-        :param session: SQLAlchemy session
-        :param token_model: Token model class
-        """
-        from authlib.oauth2.rfc7009 import RevocationEndpoint
+    authorization.register_endpoint(RevocationEndpoint)
 
-        def create_query_token_func(session, token_model):
-            """Create an ``query_token`` function for revocation, introspection
-            token endpoints.
-            :param session: SQLAlchemy session
-            :param token_model: Token model class
-            """
-
-            def query_token(token, token_type_hint, client):
-                q = session.query(token_model)
-                q = q.filter_by(client_id=client.client_id, revoked=False)
-                if token_type_hint == "access_token":
-                    return q.filter_by(access_token=token).first()
-                elif token_type_hint == "refresh_token":
-                    return q.filter_by(refresh_token=token).first()
-                # without token_type_hint
-                item = q.filter_by(access_token=token).first()
-                if item:
-                    return item
-                return q.filter_by(refresh_token=token).first()
-
-            return query_token
-
-        query_token = create_query_token_func(session, token_model)
-
-        class _RevocationEndpoint(RevocationEndpoint):
-            def query_token(self, token, token_type_hint, client):
-                return query_token(token, token_type_hint, client)
-
-            def revoke_token(self, token):
-                token.revoked = True
-                session.add(token)
-                session.commit()
-
-        return _RevocationEndpoint
-
-    revocation_cls = create_revocation_endpoint(db.session, OAuth2Token)
-    authorization.register_endpoint(revocation_cls)
-
-    # protect resource
-    def create_bearer_token_validator(session, token_model):
-        """Create an bearer token validator class with SQLAlchemy session
-        and token model.
-        :param session: SQLAlchemy session
-        :param token_model: Token model class
-        """
-        from authlib.oauth2.rfc6750 import BearerTokenValidator
-
-        class _BearerTokenValidator(BearerTokenValidator):
-            def authenticate_token(self, token_string):
-                q = session.query(token_model)
-                return q.filter_by(access_token=token_string).first()
-
-            def request_invalid(self, request):
-                return False
-
-            def token_revoked(self, token):
-                return token.revoked
-
-        return _BearerTokenValidator
-
-    bearer_cls = create_bearer_token_validator(db.session, OAuth2Token)
-    require_oauth.register_token_validator(bearer_cls())
+    require_oauth.register_token_validator(BearerTokenValidator())

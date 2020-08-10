@@ -1,10 +1,10 @@
-import time
+import datetime
 from flask import Blueprint, request, session, url_for
 from flask import render_template, redirect, jsonify
 from werkzeug.security import gen_salt
 from authlib.integrations.flask_oauth2 import current_token
 from authlib.oauth2 import OAuth2Error
-from .models import db, User, OAuth2Client
+from .models import User, Client
 from .oauth2 import authorization, require_oauth
 
 
@@ -12,9 +12,8 @@ bp = Blueprint(__name__, 'home')
 
 
 def current_user():
-    if 'id' in session:
-        uid = session['id']
-        return User.query.get(uid)
+    if 'user_dn' in session:
+        return User.get(session['user_dn'])
     return None
 
 
@@ -26,23 +25,17 @@ def split_by_crlf(s):
 def home():
     if request.method == 'POST':
         username = request.form.get('username')
-        user = User.query.filter_by(username=username).first()
+        user = User.filter(cn=username)
         if not user:
-            user = User(username=username)
-            db.session.add(user)
-            db.session.commit()
-        session['id'] = user.id
-        # if user is not just to log in, but need to head back to the auth page, then go for it
-        next_page = request.args.get('next')
-        if next_page:
-            return redirect(next_page)
+            user = User(cn=username, sn=username)
+            user.save()
+        else:
+            user = user[0]
+        session["user_dn"] = user.dn
         return redirect('/')
-    user = current_user()
-    if user:
-        clients = OAuth2Client.query.filter_by(user_id=user.id).all()
-    else:
-        clients = []
 
+    user = current_user()
+    clients = Client.filter()
     return render_template('home.html', user=user, clients=clients)
 
 
@@ -60,33 +53,30 @@ def create_client():
     if request.method == 'GET':
         return render_template('create_client.html')
 
+    form = request.form
     client_id = gen_salt(24)
-    client_id_issued_at = int(time.time())
-    client = OAuth2Client(
-        client_id=client_id,
-        client_id_issued_at=client_id_issued_at,
-        user_id=user.id,
+    client_id_issued_at = datetime.datetime.now().strftime("%y%m%d%H%M%SZ")
+    client = Client(
+        oauthClientID=client_id,
+        oauthClientIDIssueTime=client_id_issued_at,
+        oauthClientName= form["client_name"],
+        oauthClientURI= form["client_uri"],
+        oauthGrantType= split_by_crlf(form["grant_type"]),
+        oauthRedirectURI= split_by_crlf(form["redirect_uri"]),
+        oauthResponseType= split_by_crlf(form["response_type"]),
+        oauthScopeValue= form["scope"],
+        oauthTokenEndpointAuthMethod= form["token_endpoint_auth_method"]
     )
 
-    form = request.form
-    client_metadata = {
-        "client_name": form["client_name"],
-        "client_uri": form["client_uri"],
-        "grant_types": split_by_crlf(form["grant_type"]),
-        "redirect_uris": split_by_crlf(form["redirect_uri"]),
-        "response_types": split_by_crlf(form["response_type"]),
-        "scope": form["scope"],
-        "token_endpoint_auth_method": form["token_endpoint_auth_method"]
-    }
-    client.set_client_metadata(client_metadata)
-
     if form['token_endpoint_auth_method'] == 'none':
-        client.client_secret = ''
+        client.oauthClientSecret = ''
     else:
-        client.client_secret = gen_salt(48)
+        client.oauthClientSecret = gen_salt(48)
 
-    db.session.add(client)
-    db.session.commit()
+    client.save()
+
+    #db.session.add(client)
+    #db.session.commit()
     return redirect('/')
 
 

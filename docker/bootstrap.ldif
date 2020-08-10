@@ -6,6 +6,14 @@ dn: ou=clients,dc=mydomain,dc=tld
 objectclass: organizationalUnit
 ou: clients
 
+dn: ou=tokens,dc=mydomain,dc=tld
+objectclass: organizationalUnit
+ou: tokens
+
+dn: ou=authorizations,dc=mydomain,dc=tld
+objectclass: organizationalUnit
+ou: authorizations
+
 dn: cn=Jane Doe,ou=users,dc=mydomain,dc=tld
 objectclass: person
 cn: Jane Doe

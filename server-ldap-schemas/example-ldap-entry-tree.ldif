@@ -1,0 +1,151 @@
+version: 1
+
+dn: ou=oidc,dc=wonderland,dc=net
+objectClass: organizationalUnit
+objectClass: top
+ou: OIDC
+description: OpenID Connect 1.0 data
+
+dn: ou=clients,ou=oidc,dc=wonderland,dc=net
+objectClass: organizationalUnit
+objectClass: top
+ou: clients
+description: OpenID Connect 1.0 Relying Party (RP) clients
+
+dn: oauthClientID=000001,ou=clients,ou=oidc,dc=wonderland,dc=net
+objectClass: top
+objectClass: oauthClientIdentity
+objectClass: oauthClientMetadata
+objectClass: oidcRelyingParty
+oauthClientID: 000001
+oauthClientIDIssueTime: 20130101235900Z
+oauthClientRegistrationURI: https://op.wonderland.net/client-reg/?client_id=000001
+oauthClientRegistrationAccessToken: a020bba9e24c
+oauthClientSecret: 572b104253d04ddd9586507f255d10a3
+oauthClientSecretExp: 20140101235900Z
+oauthGrantType: authorization_code
+oauthGrantType: implicit
+oauthGrantType: refresh_token
+oauthResponseType: code
+oauthResponseType: id_token
+oauthResponseType: code id_token
+oauthResponseType: token id_token
+oauthScopeValue: openid
+oauthScopeValue: email
+oauthScopeValue: profile
+oauthScopeValue: address
+oauthScopeValue: offline_access
+oauthClientURI: http://fivesomezoo.com
+oauthLogoURI: http://fivesomezoo.com/logo.jpg
+oauthClientName: Fivesome Zoo App
+oauthTermsOfServiceURI: http://fivesomezoo.com/tos.html
+oauthPolicyURI: http://fivesomezoo.com/privacy-policy.html
+oauthJWKSetURI: https://fivesomezoo.com/jwk.json
+oauthRedirectURI: https://fivesomezoo.com/oidc/in
+oauthTokenEndpointAuthMethod: client_secret_basic
+oauthSoftwareID: 4c29e1f2-dde0-4ec4-9561-50ed86162ee0
+oauthSoftwareVersion: 1.0
+oidcAppType: web
+oidcSubjectType: public
+oidcDefaultACR: 2
+oidcRequireAuthTime: true
+oidcDefaultMaxAge: 1500
+oidcIDTokenJWSAlg: HS512
+oidcRequestJWSAlg: HS512
+oidcUserInfoJWSAlg: HS512
+oidcInitiateLoginURI: https://fivesomezoo.com/login
+oidcPostLogoutRedirectURI: https://fivesomezoo.com/logout
+mail: admin@fivesomezoo.com
+
+dn: oauthClientID=000002,ou=clients,ou=oidc,dc=wonderland,dc=net
+objectClass: top
+objectClass: oauthClientIdentity
+objectClass: oauthClientMetadata
+objectClass: oidcRelyingParty
+oauthClientID: 000002
+oauthClientIDIssueTime: 20130101235900Z
+oauthClientRegistrationURI: https://op.wonderland.net/client-reg/?client_id=000002
+oauthClientRegistrationAccessToken: 7bf920f2f344
+oauthClientSecret: aba8e60a76ac493e95563cbed0690126
+oauthClientSecretExp: 20140101235900Z
+oauthGrantType: authorization_code
+oauthGrantType: implicit
+oauthGrantType: refresh_token
+oauthResponseType: code
+oauthResponseType: id_token
+oauthResponseType: code id_token
+oauthResponseType: token id_token
+oauthScopeValue: openid
+oauthScopeValue: email
+oauthScopeValue: profile
+oauthScopeValue: address
+oauthScopeValue: offline_access
+oauthClientURI: http://soupbar.com
+oauthLogoURI: http://soupbar.com/logo.jpg
+oauthClientName: Soup Bar App
+oauthTermsOfServiceURI: http://soupbar.com/tos.html
+oauthPolicyURI: http://soupbar.com/privacy-policy.html
+oauthJWKSetURI: https://soupbar.com/jwk.json
+oauthRedirectURI: https://soupbar.com/oidc/in
+oauthTokenEndpointAuthMethod: private_key_jwt
+oauthTokenEndpointJWSAlg: RS256
+oauthSoftwareID: 0efb6bcf-5c36-4624-80fa-f31b0e3caf9b
+oauthSoftwareVersion: 1.0
+oidcAppType: web
+oidcSubjectType: public
+oidcDefaultACR: 2
+oidcRequireAuthTime: true
+oidcDefaultMaxAge: 1500
+oidcIDTokenJWSAlg: RS512
+oidcRequestJWSAlg: RS512
+oidcUserInfoJWSAlg: RS512
+oidcInitiateLoginURI: https://soupbar.com/login
+oidcPostLogoutRedirectURI: https://soupbar.com/logout
+mail: admin@soupbar.com
+
+dn: oauthClientID=000003,ou=clients,ou=oidc,dc=wonderland,dc=net
+objectClass: top
+objectClass: oauthClientIdentity
+objectClass: oauthClientMetadata
+objectClass: oidcRelyingParty
+oauthClientID: 000003
+oauthClientIDIssueTime: 20130101235900Z
+oauthClientRegistrationURI: https://op.wonderland.net/client-reg/?client_id=000003
+oauthClientRegistrationAccessToken: 93dfb8cf8e05
+oauthClientSecret: 7c840e40536b40ca801c80f0e7417951
+oauthClientSecretExp: 20140101235900Z
+oauthGrantType: authorization_code
+oauthGrantType: implicit
+oauthGrantType: refresh_token
+oauthResponseType: code
+oauthResponseType: id_token
+oauthResponseType: code id_token
+oauthResponseType: token id_token
+oauthScopeValue: openid
+oauthScopeValue: email
+oauthScopeValue: profile
+oauthScopeValue: address
+oauthScopeValue: offline_access
+oauthClientURI: http://bikeworld.com
+oauthLogoURI: http://bikeworld.com/logo.jpg
+oauthClientName: Bike World Online Shop
+oauthTermsOfServiceURI: http://bikeworld.com/tos.html
+oauthPolicyURI: http://bikeworld.com/privacy-policy.html
+oauthJWKSetURI: https://bikeworld.com/jwk.json
+oauthRedirectURI: https://bikeworld.com/oidc/in
+oauthTokenEndpointAuthMethod: private_key_jwt
+oauthTokenEndpointJWSAlg: ES256
+oauthSoftwareID: f39d3577-99f8-499a-a219-9754261fea95
+oauthSoftwareVersion: 1.0
+oidcAppType: web
+oidcSubjectType: pairwise
+oidcSectorIdentifierURI: http://bikeworld.com/sector.json
+oidcDefaultACR: 2
+oidcRequireAuthTime: true
+oidcDefaultMaxAge: 1500
+oidcIDTokenJWSAlg: ES512
+oidcRequestJWSAlg: ES512
+oidcUserInfoJWSAlg: ES512
+oidcInitiateLoginURI: https://bikeworld.com/login
+oidcPostLogoutRedirectURI: https://bikeworld.com/logout
+mail: admin@bikeworld.com

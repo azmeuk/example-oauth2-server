@@ -1,3 +1,4 @@
+import datetime
 from authlib.integrations.flask_oauth2 import (
     AuthorizationServer,
     ResourceProtector,
@@ -17,6 +18,7 @@ class AuthorizationCodeGrant(grants.AuthorizationCodeGrant):
     ]
 
     def save_authorization_code(self, code, request):
+        raise NotImplementedError()
         code_challenge = request.data.get("code_challenge")
         code_challenge_method = request.data.get("code_challenge_method")
         auth_code = Authorization(
@@ -33,6 +35,7 @@ class AuthorizationCodeGrant(grants.AuthorizationCodeGrant):
         return auth_code
 
     def query_authorization_code(self, code, client):
+        raise NotImplementedError()
         auth_code = Authorization.query.filter_by(
             code=code, client_id=client.client_id
         ).first()
@@ -40,11 +43,13 @@ class AuthorizationCodeGrant(grants.AuthorizationCodeGrant):
             return auth_code
 
     def delete_authorization_code(self, authorization_code):
+        raise NotImplementedError()
         pass
         #db.session.delete(authorization_code)
         #db.session.commit()
 
     def authenticate_user(self, authorization_code):
+        raise NotImplementedError()
         return User.query.get(authorization_code.user_id)
 
 
@@ -57,14 +62,17 @@ class PasswordGrant(grants.ResourceOwnerPasswordCredentialsGrant):
 
 class RefreshTokenGrant(grants.RefreshTokenGrant):
     def authenticate_refresh_token(self, refresh_token):
+        raise NotImplementedError()
         token = Token.query.filter_by(refresh_token=refresh_token).first()
         if token and token.is_refresh_token_active():
             return token
 
     def authenticate_user(self, credential):
+        raise NotImplementedError()
         return User.query.get(credential.user_id)
 
     def revoke_old_credential(self, credential):
+        raise NotImplementedError()
         credential.revoked = True
         #db.session.add(credential)
         #db.session.commit()
@@ -79,6 +87,7 @@ def save_token(token, request):
     t = Token(
         authzAccessToken=token['access_token'],
         authzScopeValue=token['scope'],
+        authzAccessTokenIssueDate=datetime.datetime.now().strftime("%Y%m%d%H%M%SZ"),
         authzSubject=request.user.dn,
         authzClientID=client_id,
         authzRefreshTokenSecret=token['refresh_token'],
@@ -90,22 +99,20 @@ def save_token(token, request):
 
 class RevocationEndpoint(RevocationEndpoint):
     def query_token(self, token, token_type_hint, client):
-        print("query_token",token, token_type_hint, client)
-        return None
+        raise NotImplementedError()
 
     def revoke_token(self, token):
-        print("revoke_token", token)
+        raise NotImplementedError()
 
 class BearerTokenValidator(BearerTokenValidator):
     def authenticate_token(self, token_string):
-        print("authenticate_token", token_string)
+        return Token.get(token_string)
 
     def request_invalid(self, request):
-        print("request_invalid", request)
         return False
 
     def token_revoked(self, token):
-        print("token_revoked", token)
+        return False
 
 authorization = AuthorizationServer(query_client=query_client, save_token=save_token,)
 require_oauth = ResourceProtector()

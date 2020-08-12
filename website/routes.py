@@ -55,17 +55,17 @@ def create_client():
 
     form = request.form
     client_id = gen_salt(24)
-    client_id_issued_at = datetime.datetime.now().strftime("%y%m%d%H%M%SZ")
+    client_id_issued_at = datetime.datetime.now().strftime("%Y%m%d%H%M%SZ")
     client = Client(
         oauthClientID=client_id,
         oauthClientIDIssueTime=client_id_issued_at,
-        oauthClientName= form["client_name"],
-        oauthClientURI= form["client_uri"],
-        oauthGrantType= split_by_crlf(form["grant_type"]),
-        oauthRedirectURI= split_by_crlf(form["redirect_uri"]),
-        oauthResponseType= split_by_crlf(form["response_type"]),
-        oauthScopeValue= form["scope"],
-        oauthTokenEndpointAuthMethod= form["token_endpoint_auth_method"]
+        oauthClientName=form["client_name"],
+        oauthClientURI=form["client_uri"],
+        oauthGrantType=split_by_crlf(form["grant_type"]),
+        oauthRedirectURI=split_by_crlf(form["redirect_uri"]),
+        oauthResponseType=split_by_crlf(form["response_type"]),
+        oauthScopeValue=form["scope"],
+        oauthTokenEndpointAuthMethod=form["token_endpoint_auth_method"]
     )
 
     if form['token_endpoint_auth_method'] == 'none':
@@ -115,5 +115,6 @@ def revoke_token():
 @bp.route('/api/me')
 @require_oauth('profile')
 def api_me():
-    user = current_token.user
-    return jsonify(id=user.id, username=user.username)
+    user_dn = current_token.authzSubject[0]
+    user = User.get(user_dn)
+    return jsonify(id=user.cn, name=user.sn)

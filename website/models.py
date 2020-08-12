@@ -1,4 +1,5 @@
 import ldap
+import datetime
 from flask import g
 from authlib.common.encoding import json_loads, json_dumps
 from authlib.oauth2.rfc6749.util import scope_to_list, list_to_scope
@@ -413,7 +414,9 @@ class Token(LDAPObjectHelper, TokenMixin):
         return self.authzScopeValue[0]
 
     def get_expires_in(self):
-        return self.authzAccessTokenLifetime[0]
+        return int(self.authzAccessTokenLifetime[0])
 
     def get_expires_at(self):
-        return self.authzAccessTokenIssueDate[0] + self.authzAccessTokenLifetime[0]
+        issue_date = datetime.datetime.strptime(self.authzAccessTokenIssueDate[0], "%Y%m%d%H%M%SZ")
+        issue_timestamp = (issue_date - datetime.datetime(1970, 1, 1)).total_seconds()
+        return issue_timestamp + int(self.authzAccessTokenLifetime[0])

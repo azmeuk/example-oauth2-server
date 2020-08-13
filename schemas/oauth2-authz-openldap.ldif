@@ -1,6 +1,6 @@
-dn: cn=oidcAuthz,cn=schema,cn=config
+dn: cn=oauth2Authz,cn=schema,cn=config
 objectClass: olcSchemaConfig
-cn: oidcAuthz
+cn: oauth2Authz
 olcAttributeTypes: (  1.3.6.1.4.1.40805.2.1.1 NAME 'authzAccessToken'
         DESC 'OAuth 2.0 access token'
         EQUALITY caseExactMatch
@@ -220,67 +220,6 @@ olcAttributeTypes: (  1.3.6.1.4.1.40805.2.1.27 NAME 'authzRevocationDate'
         SINGLE-VALUE
         USAGE userApplications
         X-ORIGIN 'OAuth 2.0' )
-olcAttributeTypes: (  1.3.6.1.4.1.40805.2.1.17 NAME 'oidcIDToken'
-        DESC 'OpenID Connect ID token'
-        EQUALITY caseExactMatch
-        ORDERING caseExactOrderingMatch
-        SUBSTR caseExactSubstringsMatch
-        SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
-        SINGLE-VALUE
-        USAGE userApplications
-        X-ORIGIN 'OpenID Connect 1.0' )
-olcAttributeTypes: (  1.3.6.1.4.1.40805.2.1.18 NAME 'oidcClaimName'
-        DESC 'Consented OpenID Connect claim name, with optional language tag'
-        EQUALITY caseExactMatch
-        ORDERING caseExactOrderingMatch
-        SUBSTR caseExactSubstringsMatch
-        SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
-        USAGE userApplications
-        X-ORIGIN 'OpenID Connect 1.0' )
-olcAttributeTypes: (  1.3.6.1.4.1.40805.2.1.19 NAME 'oidcSavedClaimName'
-        DESC 'Saved consented OpenID Connect claim name from a previous authorisation, with optional language tag'
-        EQUALITY caseExactMatch
-        ORDERING caseExactOrderingMatch
-        SUBSTR caseExactSubstringsMatch
-        SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
-        USAGE userApplications
-        X-ORIGIN 'OpenID Connect 1.0' )
-olcAttributeTypes: (  1.3.6.1.4.1.40805.2.1.20 NAME 'oidcClaimsLocales'
-        DESC 'OpenID Connect claims locales, space separated, by order of preference'
-        EQUALITY caseExactMatch
-        ORDERING caseExactOrderingMatch
-        SUBSTR caseExactSubstringsMatch
-        SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
-        SINGLE-VALUE
-        USAGE userApplications
-        X-ORIGIN 'OpenID Connect 1.0' )
-olcAttributeTypes: (  1.3.6.1.4.1.40805.2.1.33 NAME 'oidcClaimsData'
-        DESC 'OpenID Connect claims fulfillment data'
-        EQUALITY caseExactMatch
-        ORDERING caseExactOrderingMatch
-        SUBSTR caseExactSubstringsMatch
-        SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
-        SINGLE-VALUE
-        USAGE userApplications
-        X-ORIGIN 'OpenID Connect 1.0' )
-olcAttributeTypes: (  1.3.6.1.4.1.40805.2.1.21 NAME 'oidcPresetUserInfoClaims'
-        DESC 'Preset OpenID Connect UserInfo claims, as JSON object'
-        EQUALITY caseExactMatch
-        ORDERING caseExactOrderingMatch
-        SUBSTR caseExactSubstringsMatch
-        SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
-        SINGLE-VALUE
-        USAGE userApplications
-        X-ORIGIN 'OpenID Connect 1.0' )
-olcAttributeTypes: (  1.3.6.1.4.1.40805.2.1.22 NAME 'oidcSessionID'
-        DESC 'Subject session identifier (SID)'
-        EQUALITY caseExactMatch
-        ORDERING caseExactOrderingMatch
-        SUBSTR caseExactSubstringsMatch
-        SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
-        SINGLE-VALUE
-        USAGE userApplications
-        X-ORIGIN 'OpenID Connect 1.0' )
 olcObjectClasses: ( 1.3.6.1.4.1.40805.2.2.1 NAME 'oauth2Authz'
         DESC 'OAuth 2.0 authorization'
         SUP top
@@ -339,30 +278,6 @@ olcObjectClasses: ( 1.3.6.1.4.1.40805.2.2.2 NAME 'oauth2AuthzAux'
               authzSavedDetails $
               authzLastAccessDate )
         X-ORIGIN 'OAuth 2.0' )
-olcObjectClasses: ( 1.3.6.1.4.1.40805.2.2.3 NAME 'oidcAuthz'
-        DESC 'OAuth 2.0 / OpenID Connect authorization'
-        SUP oauth2Authz
-        STRUCTURAL
-        MAY ( oidcIDToken $
-              oidcClaimName $
-              oidcSavedClaimName $
-              oidcClaimsLocales $
-              oidcClaimsData $
-              oidcPresetUserInfoClaims $
-              oidcSessionID )
-        X-ORIGIN 'OAuth 2.0' )
-olcObjectClasses: ( 1.3.6.1.4.1.40805.2.2.4 NAME 'oidcAuthzAux'
-        DESC 'OAuth 2.0 / OpenID Connect authorization'
-        SUP oauth2AuthzAux
-        AUXILIARY
-        MAY ( oidcIDToken $
-              oidcClaimName $
-              oidcSavedClaimName $
-              oidcClaimsLocales $
-              oidcClaimsData $
-              oidcPresetUserInfoClaims $
-              oidcSessionID )
-        X-ORIGIN 'OAuth 2.0' )
 olcObjectClasses: ( 1.3.6.1.4.1.40805.2.2.5 NAME 'oauth2AuthzRevocation'
         DESC 'OAuth 2.0 authorization revocation'
         SUP top
@@ -420,22 +335,4 @@ olcObjectClasses: ( 1.3.6.1.4.1.40805.2.2.8 NAME 'oauth2IdAccessTokenAux'
               authzOtherTopLevelParams $
               authzCnf $
               authzDetails )
-        X-ORIGIN 'OAuth 2.0' )
-olcObjectClasses: ( 1.3.6.1.4.1.40805.2.2.9 NAME 'oidcIdAccessToken'
-        DESC 'OAuth 2.0 / OpenID Connect access token'
-        SUP oauth2IdAccessToken
-        STRUCTURAL
-        MAY ( oidcClaimName $
-              oidcClaimsLocales $
-              oidcClaimsData $
-              oidcPresetUserInfoClaims )
-        X-ORIGIN 'OAuth 2.0' )
-olcObjectClasses: ( 1.3.6.1.4.1.40805.2.2.10 NAME 'oidcIdAccessTokenAux'
-        DESC 'OAuth 2.0 / OpenID Connect access token'
-        SUP oauth2IdAccessTokenAux
-        AUXILIARY
-        MAY ( oidcClaimName $
-              oidcClaimsLocales $
-              oidcClaimsData $
-              oidcPresetUserInfoClaims )
         X-ORIGIN 'OAuth 2.0' )

@@ -3,31 +3,11 @@ import datetime
 from flask import g
 from authlib.common.encoding import json_loads, json_dumps
 from authlib.oauth2.rfc6749.util import scope_to_list, list_to_scope
-from authlib.oauth2.rfc6749 import ClientMixin
 from authlib.oauth2.rfc6749 import (
+    ClientMixin,
     TokenMixin,
     AuthorizationCodeMixin,
 )
-#from flask_sqlalchemy import SQLAlchemy
-
-
-#db = SQLAlchemy()
-#
-#
-#class User(db.Model):
-#    id = db.Column(db.Integer, primary_key=True)
-#    username = db.Column(db.String(40), unique=True)
-#
-#    def __str__(self):
-#        return self.username
-#
-#    def get_user_id(self):
-#        return self.id
-#
-#    def check_password(self, password):
-#        return password == 'valid'
-#
-#
 #class OAuth2Client(db.Model, ClientMixin):
 #    __tablename__ = 'oauth2_client'
 #
@@ -246,6 +226,8 @@ class LDAPObjectHelper:
     base = None
     id = None
 
+    #TODO If ldap attribute is SINGLE-VALUE, do not bother with lists
+
     def __init__(self, dn=None, **kwargs):
         self.attrs = {}
         for k, v in kwargs.items():
@@ -322,8 +304,8 @@ class LDAPObjectHelper:
     def filter(cls, base=None, **kwargs):
         class_filter = "".join([f"(objectClass={oc})" for oc in cls.objectClass])
         arg_filter = "".join(f"({k}={v})" for k, v in kwargs.items())
-        filter = f"(&{class_filter}{arg_filter})"
-        result = g.ldap.search_s(base or cls.base, ldap.SCOPE_SUBTREE, filter)
+        ldapfilter = f"(&{class_filter}{arg_filter})"
+        result = g.ldap.search_s(base or cls.base, ldap.SCOPE_SUBTREE, ldapfilter)
 
         return [
             cls(
@@ -345,7 +327,6 @@ class LDAPObjectHelper:
             self.attrs[name] = value
 
 
-
 class User(LDAPObjectHelper):
     objectClass = ["person"]
     base = "ou=users,dc=mydomain,dc=tld"
@@ -359,7 +340,7 @@ class User(LDAPObjectHelper):
 
 
 class Client(LDAPObjectHelper, ClientMixin):
-    objectClass = ["oauthClientIdentity", "oauthClientMetadataAux"]
+    objectClass = ["oauthClientIdentity"]
     base = "ou=clients,dc=mydomain,dc=tld"
     id = "oauthClientID"
 

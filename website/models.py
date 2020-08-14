@@ -372,7 +372,7 @@ class Client(LDAPObjectHelper, ClientMixin):
         return grant_type in self.oauthGrantType
 
 
-class Authorization(LDAPObjectHelper, AuthorizationCodeMixin):
+class AuthorizationCode(LDAPObjectHelper, AuthorizationCodeMixin):
     objectClass = ["oauth2Authz"]
     base = "ou=authorizations,dc=mydomain,dc=tld"
 

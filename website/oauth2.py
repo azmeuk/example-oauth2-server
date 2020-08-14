@@ -114,7 +114,7 @@ class BearerTokenValidator(BearerTokenValidator):
     def token_revoked(self, token):
         return False
 
-authorization = AuthorizationServer(query_client=query_client, save_token=save_token,)
+authorization = AuthorizationServer(query_client=query_client, save_token=save_token)
 require_oauth = ResourceProtector()
 
 
